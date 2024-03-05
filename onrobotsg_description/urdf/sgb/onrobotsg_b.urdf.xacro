@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<robot name="onrobotsg_b" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:include filename="$(find onrobotsg_description)/urdf/sgb/onrobotsg_b_macro.urdf.xacro" />
+
+    <!-- base fixed link  -->
+    <link name="gripper_adapter_link">
+    </link>
+
+    <xacro:onrobotsg_b prefix="" parent="gripper_adapter_link" >
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:onrobotsg_b>
+</robot>
