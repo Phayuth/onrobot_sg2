@@ -1,7 +1,7 @@
 from pymodbus.client.tcp import ModbusTcpClient
 
 
-class OnrobotSGDriver():
+class OnrobotSGDriver:
 
     def __init__(self, ip, port, modelID):
         # open connection to device
@@ -12,10 +12,12 @@ class OnrobotSGDriver():
         self.set_model_id(modelID)
         self.set_init()
 
-        self.gripperTypes = {1 : "None",
-                             2 : "SG-a-H (Flower-Like w/o White Tip)",
-                             3 : "SG-a-S (Flower-Like w/ White Tip)",
-                             4 : "SG-b-H (Claw-Like)"}
+        self.gripperTypes = {
+            1: "None",
+            2: "SG-a-H (Flower-Like w/o White Tip)",
+            3: "SG-a-S (Flower-Like w/ White Tip)",
+            4: "SG-b-H (Claw-Like)",
+        }
         self.gripperChosen = self.gripperTypes[modelID]
         self.maxWidth, self.minWidth = self.get_maxmin_width()
 
@@ -27,10 +29,10 @@ class OnrobotSGDriver():
         return realmm
 
     def cnvt_real_to_signal(self, real):
-        return int(real*10)
+        return int(real * 10)
 
     def cnvt_signal_to_real(self, signal):
-        return signal/10.0
+        return signal / 10.0
 
     def open_connection(self):
         self.client.connect()
@@ -54,7 +56,7 @@ class OnrobotSGDriver():
     def set_stop(self):
         self.set_command(0x2)
 
-    def set_gentle(self, command:bool):
+    def set_gentle(self, command: bool):
         """
         Gripping speed is reduced at 12.5mm before the specified target width
 
@@ -65,26 +67,26 @@ class OnrobotSGDriver():
         self.client.write_register(address=0x0003, value=modelID, unit=1)
 
     def get_width(self):
-        response =  self.client.read_holding_registers(address=0x0100, count=1, slave=65)
+        response = self.client.read_holding_registers(address=0x0100, count=1, slave=65)
         width = response.registers[0]
         return self.cnvt_signal_to_real(width)
 
     def get_status(self):
-        response =  self.client.read_holding_registers(address=0x0103, count=1, slave=65)
+        response = self.client.read_holding_registers(address=0x0103, count=1, slave=65)
         status = response.registers[0]
         return status
 
     def get_maxmin_width(self):
-        response =  self.client.read_holding_registers(address=0x0105, count=1, slave=65)
+        response = self.client.read_holding_registers(address=0x0105, count=1, slave=65)
         maxwidth = response.registers[0]
 
-        response =  self.client.read_holding_registers(address=0x0106, count=1, slave=65)
+        response = self.client.read_holding_registers(address=0x0106, count=1, slave=65)
         minwidth = response.registers[0]
 
         return self.cnvt_signal_to_real(maxwidth), self.cnvt_signal_to_real(minwidth)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     sg = OnrobotSGDriver("192.168.0.137", 502, 4)
     print(sg.get_maxmin_width())
     sg.set_gentle(False)
