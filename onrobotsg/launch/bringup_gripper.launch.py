@@ -1,6 +1,3 @@
-import os
-import xacro
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -8,9 +5,6 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-
-    robot_description_config = xacro.process_file(os.path.join(get_package_share_directory("onrobotsg_description"), "urdf", "sga", "onrobotsg_a.urdf.xacro"))
-
     la = []
     la.append(
         DeclareLaunchArgument(
@@ -62,15 +56,6 @@ def generate_launch_description():
             package="tf2_ros",
             executable="static_transform_publisher",
             arguments=["0.0", "0.0", "0.0", "1.5708", "-1.5708", "0.0", "tool0", "gripper_adapter_link"],
-        )
-    )
-    ld.append(
-        Node(
-            package="robot_state_publisher",
-            executable="robot_state_publisher",
-            namespace="gripper",
-            output="screen",
-            parameters=[{"robot_description": robot_description_config.toxml()}],
         )
     )
 
