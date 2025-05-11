@@ -35,6 +35,13 @@ def generate_launch_description():
             description="Gripping speed is reduced at 12.5mm before the specified target width",
         )
     )
+    la.append(
+        DeclareLaunchArgument(
+            "use_fake_hardware",
+            default_value="false",
+            description="Use fake hardware instead of real hardware",
+        )
+    )
 
     ld = []
     ld.append(
@@ -47,16 +54,10 @@ def generate_launch_description():
                 {"port": LaunchConfiguration("port")},
                 {"model_id": LaunchConfiguration("model_id")},
                 {"gentle": LaunchConfiguration("gentle")},
+                {"use_fake_hardware": LaunchConfiguration("use_fake_hardware")},
             ],
             output="screen",
         ),
-    )
-    ld.append(
-        Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            arguments=["0.0", "0.0", "0.0", "1.5708", "-1.5708", "0.0", "tool0", "gripper_adapter_link"],
-        )
     )
 
     return LaunchDescription(la + ld)

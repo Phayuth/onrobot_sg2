@@ -25,20 +25,39 @@ class OnrobotSGServer(Node):
         self.declare_parameter("port", 502)
         self.declare_parameter("model_id", 4)
         self.declare_parameter("gentle", False)
+        self.declare_parameter("use_fake_hardware", False)
 
         self.ip = self.get_parameter("ip").value
         self.port = self.get_parameter("port").value
         self.modelID = self.get_parameter("model_id").value
         self.gentle = self.get_parameter("gentle").value
+        self.use_fake_hardware = self.get_parameter("use_fake_hardware").value
         self.add_on_set_parameters_callback(self.set_param_cb)
 
-        self.get_logger().info(bcolors.OKGREEN + "Setting Up Connection" + bcolors.ENDC)
-        self.sg = OnrobotSGDriver(self.ip, self.port, self.modelID)
-        self.sg.set_gentle(self.gentle)
-        self.get_logger().info(f"Gripper Width Range : {[self.sg.minWidth, self.sg.maxWidth]} in (mm)")
-        self.srv = self.create_service(OnrobotSG, "gripper_command", self.execute_callback)
+        self.get_logger().info(
+            bcolors.OKGREEN + "Setting Up Connection" + bcolors.ENDC
+        )
+        if not self.use_fake_hardware:
+            self.sg = OnrobotSGDriver(self.ip, self.port, self.modelID)
+            self.sg.set_gentle(self.gentle)
+            self.get_logger().info(
+                f"Gripper Width Range : {[self.sg.minWidth, self.sg.maxWidth]} in (mm)"
+            )
+        if not self.use_fake_hardware:
+            exe_callback = self.execute_callback
+        else:
+            exe_callback = self.execute_fake_callback
+
+        self.srv = self.create_service(OnrobotSG, "gripper_command", exe_callback)
+
+        self.get_logger().info(
+            bcolors.OKGREEN + "Gripper Server is Ready" + bcolors.ENDC
+        )
 
     def set_param_cb(self, params):
+        if self.use_fake_hardware:
+            return SetParametersResult(successful=True)
+
         for p in params:
             if p.name == "gentle":
                 if p.type_ == p.Type.BOOL:
@@ -58,9 +77,18 @@ class OnrobotSGServer(Node):
         response.status = "SUCCESS"
         return response
 
+    def execute_fake_callback(self, request, response):
+        self.get_logger().info(f"Incoming request {[request.desiredwidth]} mm")
+        self.get_logger().info("Fake Gripper is moving")
+        response.status = "SUCCESS"
+        return response
+
     def close_connection(self):
-        self.sg.close_connection()
-        self.get_logger().info(bcolors.OKGREEN + "Gripper connection is disconnected" + bcolors.ENDC)
+        if not self.use_fake_hardware:
+            self.sg.close_connection()
+        self.get_logger().info(
+            bcolors.OKGREEN + "Gripper connection is disconnected" + bcolors.ENDC
+        )
 
 
 def main(args=None):

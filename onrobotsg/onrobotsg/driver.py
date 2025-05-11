@@ -84,13 +84,3 @@ class OnrobotSGDriver:
         minwidth = response.registers[0]
 
         return self.cnvt_signal_to_real(maxwidth), self.cnvt_signal_to_real(minwidth)
-
-
-if __name__ == "__main__":
-    sg = OnrobotSGDriver("192.168.0.137", 502, 4)
-    print(sg.get_maxmin_width())
-    sg.set_gentle(False)
-    # sg.set_target(500)
-    # sg.set_move()
-    # print(sg.get_width())
-    # sg.close_connection() # close connection to gripper
